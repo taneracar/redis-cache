@@ -1,6 +1,6 @@
 import { redis } from "./redis";
 
-export async function getUser(id: number, forceRefresh = false) {
+export async function getUser(id: string, forceRefresh = false) {
   const cached = await redis.hgetall<Record<string, string>>(`user:${id}`);
 
   if (!forceRefresh && cached && Object.keys(cached).length > 0) {
@@ -9,7 +9,7 @@ export async function getUser(id: number, forceRefresh = false) {
 
   // Strapi'den çek
   const res = await fetch(
-    `https://devoted-symphony-50466bf56c.strapiapp.com/api/brands?filters[id][$eq]=${id}&populate=*`
+    `https://devoted-symphony-50466bf56c.strapiapp.com/api/brands?filters[documentId][$eq]=x8g32n32h29inpgqumd9ytev`
   );
   const data = await res.json();
   const userData = data.data[0];
@@ -28,4 +28,3 @@ export async function getUser(id: number, forceRefresh = false) {
 
   return userData;
 }
-
