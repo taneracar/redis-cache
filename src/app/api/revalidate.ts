@@ -1,21 +1,25 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import Redis from "ioredis";
 
-const redis = new Redis("https://fast-bison-13652.upstash.io");
+const redis = new Redis(process.env.REDIS_URL!);
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { id } = req.body;
+  try {
+    // Burada Redis cache temizle
+    const key = req.body.key; // trigger ile gelen key
+    await redis.del(key);
 
-  if (!id) return res.status(400).json({ message: "No ID provided" });
+    // Opsiyonel: ISR için Vercel revalidate
+    if (req.body.path) {
+      await res.revalidate(req.body.path);
+    }
 
-  await redis.del(`myKey:${id}`); // cache temizleniyor
-
-  res.status(200).json({ message: `Cache cleared for id ${id}` });
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
 }
