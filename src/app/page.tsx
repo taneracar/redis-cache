@@ -20,7 +20,7 @@ export default async function Home({
   const lang = (await params).lang;
   const { BrandsPageData } = await getData();
   console.log(BrandsPageData);
-  const user = await getUser(2);
+  const user = await getUser(5);
 
   return (
     <div className="flex items-center justify-center w-full h-screen flex-col gap-10 text-white">
