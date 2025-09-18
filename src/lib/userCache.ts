@@ -9,7 +9,7 @@ export async function getUser(id: string, forceRefresh = false) {
 
   // Strapi'den çek
   const res = await fetch(
-    `https://devoted-symphony-50466bf56c.strapiapp.com/api/brands?filters[documentId][$eq]=x8g32n32h29inpgqumd9ytev`
+    `https://devoted-symphony-50466bf56c.strapiapp.com/api/brands?filters[documentId][$eq]=${id}`
   );
   const data = await res.json();
   const userData = data.data[0];
