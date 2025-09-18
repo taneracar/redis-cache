@@ -4,22 +4,24 @@ import Redis from "ioredis";
 const redis = new Redis(process.env.REDIS_URL!);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+  if (req.method !== "POST" && req.method !== "GET") {
+    return res.status(405).json({ message: "Method Not Allowed" });
   }
 
   try {
-    // Burada Redis cache temizle
-    const key = req.body.key; // trigger ile gelen key
+    const body = req.body || {};
+    const key = body.key || "default-key";
+    const path = body.path || "/";
+
+    // Redis cache temizle
     await redis.del(key);
 
-    // Opsiyonel: ISR için Vercel revalidate
-    if (req.body.path) {
-      await res.revalidate(req.body.path);
-    }
+    // Next.js ISR revalidate
+    if (path) await res.revalidate(path);
 
-    return res.json({ success: true });
+    return res.json({ success: true, method: req.method });
   } catch (err) {
-    return res.status(500).json({ message: "Internal Server Error" });
+    console.error(err);
+    return res.status(500).json({ message: "Error clearing cache" });
   }
 }
